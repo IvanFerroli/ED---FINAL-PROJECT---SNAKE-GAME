@@ -30,8 +30,6 @@ char getInput(); // Read player input
 #define RIGHT 'D'
 
 // Movement function
-void moveSnake(SnakeNode** head, char direction, char board[HEIGHT][WIDTH]);
-
-
+void moveSnake(SnakeNode** head, char direction, char board[HEIGHT][WIDTH], int* score);
 
 #endif

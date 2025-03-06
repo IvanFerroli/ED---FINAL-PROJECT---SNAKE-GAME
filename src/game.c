@@ -61,7 +61,7 @@ char getInput() {
 
 
 // Move the snake in the given direction
-void moveSnake(SnakeNode** head, char direction, char board[HEIGHT][WIDTH]) {
+void moveSnake(SnakeNode** head, char direction, char board[HEIGHT][WIDTH], int* score) {
     int newX = (*head)->x;
     int newY = (*head)->y;
 
@@ -88,6 +88,10 @@ void moveSnake(SnakeNode** head, char direction, char board[HEIGHT][WIDTH]) {
 
     // Check if fruit was eaten
     int fruitEaten = (board[newX][newY] == FRUIT);
+    if (fruitEaten) {
+        *score += 10;  // ✅ Increase score
+        placeFruit(board); // Generate new fruit
+    }
 
     // Add new head
     SnakeNode* newHead = (SnakeNode*)malloc(sizeof(SnakeNode));
@@ -96,7 +100,7 @@ void moveSnake(SnakeNode** head, char direction, char board[HEIGHT][WIDTH]) {
     newHead->next = *head;
     *head = newHead;
 
-    // ✅ FIX: Ensure old tail is removed if no fruit was eaten
+    // ✅ FIX: Remove tail only if fruit was NOT eaten
     if (!fruitEaten) {
         SnakeNode* temp = *head;
         while (temp->next->next != NULL) { // Find second last node
@@ -105,8 +109,6 @@ void moveSnake(SnakeNode** head, char direction, char board[HEIGHT][WIDTH]) {
         board[temp->next->x][temp->next->y] = EMPTY; // Clear old tail position
         free(temp->next); // Remove tail
         temp->next = NULL;
-    } else {
-        placeFruit(board); // Generate new fruit
     }
 
     // ✅ FIX: Ensure board updates for all snake parts
