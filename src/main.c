@@ -17,6 +17,10 @@ int main() {
     placeFruit(board);
     drawBoard(board);
 
+    printf("Press any key to start...\n");
+    while (!getInput());
+
+
     while (1) {
         char move = getInput();
         if (move != 0) lastMove = move;
