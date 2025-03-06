@@ -1,3 +1,4 @@
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "game.h"
@@ -34,3 +35,16 @@ void drawBoard(char board[HEIGHT][WIDTH]) {
         printf("\n");
     }
 }
+
+// Place a fruit at a random empty position
+void placeFruit(char board[HEIGHT][WIDTH]) {
+    int x, y;
+
+    do {
+        x = rand() % (HEIGHT - 2) + 1;  // Avoid walls
+        y = rand() % (WIDTH - 2) + 1;
+    } while (board[x][y] != EMPTY); // Ensure empty space
+
+    board[x][y] = FRUIT;
+}
+

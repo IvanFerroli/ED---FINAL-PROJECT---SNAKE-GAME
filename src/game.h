@@ -19,6 +19,7 @@ typedef struct SnakeNode {
 // Function declarations
 void initializeBoard(char board[HEIGHT][WIDTH]);
 void drawBoard(char board[HEIGHT][WIDTH]);
+void placeFruit(char board[HEIGHT][WIDTH]);
 SnakeNode* initializeSnake();
 
 #endif
