@@ -2,8 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "game.h"
-#include <ctype.h> // ✅ Include this at the top of game.c
-
+#include <ctype.h> 
+#include <sys/select.h>
+#include <unistd.h>
+#include <termios.h> 
+#include <fcntl.h>     
 
 // Initialize the game board
 void initializeBoard(char board[HEIGHT][WIDTH]) {
@@ -49,16 +52,26 @@ void placeFruit(char board[HEIGHT][WIDTH]) {
     board[x][y] = FRUIT;
 }
 
-// Read user input (WASD)
 char getInput() {
-    char input;
-    printf("Enter move (WASD): ");
-    input = getchar();
-    while (getchar() != '\n'); // Clear input buffer
-    return toupper(input); // ✅ Converts 'w' -> 'W', 'a' -> 'A', etc.
+    struct termios oldt, newt;
+    char input = 0;
+
+    // ✅ Get terminal settings
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);  // Disable buffering & echo
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    
+    // ✅ Make stdin non-blocking
+    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+
+    input = getchar(); // ✅ Read input (non-blocking)
+    
+    // ✅ Restore terminal settings
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    
+    return (input != EOF) ? toupper(input) : 0; // ✅ Convert input & return
 }
-
-
 
 // Move the snake in the given direction
 void moveSnake(SnakeNode** head, char direction, char board[HEIGHT][WIDTH], int* score) {
