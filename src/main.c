@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 
 int main() {
     srand(time(NULL)); // Random seed
@@ -15,31 +16,39 @@ int main() {
     placeFruit(board);
     drawBoard(board);
 
-    while (1) {
-        char move = getInput();
-        printf("DEBUG: Player pressed: %c\n", move); // Debugging print
-    
-        moveSnake(&snake, move, board, &score); // ✅ Pass score pointer
+    #include <unistd.h> // ✅ Include for usleep()
 
-        // ✅ Instead of resetting the entire board, only update necessary positions
-        for (int i = 0; i < HEIGHT; i++) {
-            for (int j = 0; j < WIDTH; j++) {
-                if (board[i][j] != WALL && board[i][j] != FRUIT) {
-                    board[i][j] = EMPTY; // Clear only non-wall/non-fruit positions
-                }
+while (1) {
+    char move = getInput();
+    printf("DEBUG: Player pressed: %c\n", move); // Debugging print
+
+    moveSnake(&snake, move, board, &score); // ✅ Pass score pointer
+
+    system("clear"); // ✅ Clears the screen before drawing (Linux/macOS)
+    // system("cls"); // ✅ Use this instead if you're on Windows
+
+    // ✅ Instead of resetting the entire board, only update necessary positions
+    for (int i = 0; i < HEIGHT; i++) {
+        for (int j = 0; j < WIDTH; j++) {
+            if (board[i][j] != WALL && board[i][j] != FRUIT) {
+                board[i][j] = EMPTY; // Clear only non-wall/non-fruit positions
             }
         }
-
-        // ✅ Draw the entire snake on the board
-        SnakeNode* current = snake;
-        while (current != NULL) {
-            board[current->x][current->y] = SNAKE;
-            current = current->next;
-        }
-
-        drawBoard(board); // Print updated board
-        printf("Score: %d\n", score); // ✅ Print score after updating board
     }
+
+    // ✅ Draw the entire snake on the board
+    SnakeNode* current = snake;
+    while (current != NULL) {
+        board[current->x][current->y] = SNAKE;
+        current = current->next;
+    }
+
+    drawBoard(board); // ✅ Print updated board
+    printf("Score: %d\n", score); // ✅ Print score after updating board
+
+    usleep(100000); // ✅ Small delay (100ms) to smooth rendering and prevent flickering
+}
+
 
     free(snake);
     return 0;
