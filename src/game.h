@@ -21,5 +21,7 @@ void initializeBoard(char board[HEIGHT][WIDTH]);
 void drawBoard(char board[HEIGHT][WIDTH]);
 void placeFruit(char board[HEIGHT][WIDTH]);
 SnakeNode* initializeSnake();
+char getInput(); // Read player input
+
 
 #endif

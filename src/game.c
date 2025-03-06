@@ -48,3 +48,11 @@ void placeFruit(char board[HEIGHT][WIDTH]) {
     board[x][y] = FRUIT;
 }
 
+// Read user input (WASD)
+char getInput() {
+    char input;
+    printf("Enter move (WASD): ");
+    input = getchar();
+    while (getchar() != '\n'); // Clear input buffer
+    return input;
+}

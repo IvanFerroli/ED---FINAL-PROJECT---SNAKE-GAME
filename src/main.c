@@ -1,17 +1,22 @@
 #include "game.h"
 #include <stdlib.h>
-#include <time.h> // Include for time()
+#include <stdio.h>
+#include <time.h>
 
 int main() {
-    srand(time(NULL)); // ✅ Initialize RNG once
+    srand(time(NULL)); // Random seed
 
     char board[HEIGHT][WIDTH];
     SnakeNode* snake = initializeSnake(); // Create the snake
 
     initializeBoard(board);  // Set up the board
-    board[snake->x][snake->y] = SNAKE; // Place snake head
-    placeFruit(board); // Spawn the fruit randomly
+    board[snake->x][snake->y] = SNAKE; // Place snake
+    placeFruit(board); // Spawn the fruit
     drawBoard(board);  // Print the board
+
+    // Read input (doesn't move yet)
+    char move = getInput();
+    printf("You pressed: %c\n", move);
 
     free(snake); // Clean memory
     return 0;
