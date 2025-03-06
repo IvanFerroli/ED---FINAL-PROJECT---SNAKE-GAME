@@ -84,9 +84,15 @@ void moveSnake(SnakeNode** head, char direction, char board[HEIGHT][WIDTH], int*
         default: return;
     }
 
-    if (board[newX][newY] == WALL || board[newX][newY] == SNAKE) {
+     if (board[newX][newY] == WALL) {
+        printf("Game Over! You hit a wall.\n");
         exit(0);
     }
+    if (board[newX][newY] == SNAKE) {
+        printf("Game Over! You hit yourself.\n");
+        exit(0);
+    }
+
 
     int fruitEaten = (board[newX][newY] == FRUIT);
     if (fruitEaten) {
