@@ -8,29 +8,26 @@
 #include <termios.h> 
 #include <fcntl.h>     
 
-// Initialize the game board
 void initializeBoard(char board[HEIGHT][WIDTH]) {
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             if (i == 0 || i == HEIGHT - 1 || j == 0 || j == WIDTH - 1) {
-                board[i][j] = WALL;  // Place walls on the borders
+                board[i][j] = WALL;
             } else {
-                board[i][j] = EMPTY; // Empty space inside
+                board[i][j] = EMPTY;
             }
         }
     }
 }
 
-// Initialize the snake in the center of the board
 SnakeNode* initializeSnake() {
     SnakeNode* head = (SnakeNode*)malloc(sizeof(SnakeNode));
     head->x = HEIGHT / 2;
     head->y = WIDTH / 2;
-    head->next = NULL; // Only one segment for now
+    head->next = NULL;
     return head;
 }
 
-// Print the game board
 void drawBoard(char board[HEIGHT][WIDTH]) {
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
@@ -40,15 +37,12 @@ void drawBoard(char board[HEIGHT][WIDTH]) {
     }
 }
 
-// Place a fruit at a random empty position
 void placeFruit(char board[HEIGHT][WIDTH]) {
     int x, y;
-
     do {
-        x = rand() % (HEIGHT - 2) + 1;  // Avoid walls
+        x = rand() % (HEIGHT - 2) + 1;
         y = rand() % (WIDTH - 2) + 1;
-    } while (board[x][y] != EMPTY); // Ensure empty space
-
+    } while (board[x][y] != EMPTY);
     board[x][y] = FRUIT;
 }
 
@@ -56,75 +50,66 @@ char getInput() {
     struct termios oldt, newt;
     char input = 0;
 
-    // ✅ Get terminal settings
     tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);  // Disable buffering & echo
+    newt.c_lflag &= ~(ICANON | ECHO);
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    
-    // ✅ Make stdin non-blocking
-    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 
-    input = getchar(); // ✅ Read input (non-blocking)
-    
-    // ✅ Restore terminal settings
+    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+    input = getchar();
+
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    
-    return (input != EOF) ? toupper(input) : 0; // ✅ Convert input & return
+
+    if (input == '\033') {
+        getchar();
+        switch (getchar()) {
+            case ARROW_UP: return UP;
+            case ARROW_DOWN: return DOWN;
+            case ARROW_RIGHT: return RIGHT;
+            case ARROW_LEFT: return LEFT;
+        }
+    }
+    return (input != EOF) ? toupper(input) : 0;
 }
 
-// Move the snake in the given direction
 void moveSnake(SnakeNode** head, char direction, char board[HEIGHT][WIDTH], int* score) {
     int newX = (*head)->x;
     int newY = (*head)->y;
 
-    // Determine new head position
     switch (direction) {
         case UP: newX--; break;
         case DOWN: newX++; break;
         case LEFT: newY--; break;
         case RIGHT: newY++; break;
-        default: return; // Invalid input, ignore
+        default: return;
     }
 
-    printf("DEBUG: Moving from (%d, %d) to (%d, %d)\n", (*head)->x, (*head)->y, newX, newY);
-
-    // Check for collision
-    if (board[newX][newY] == WALL) {
-        printf("Game Over! You hit a wall.\n");
-        exit(0);
-    }
-    if (board[newX][newY] == SNAKE) {
-        printf("Game Over! You hit yourself.\n");
+    if (board[newX][newY] == WALL || board[newX][newY] == SNAKE) {
         exit(0);
     }
 
-    // Check if fruit was eaten
     int fruitEaten = (board[newX][newY] == FRUIT);
     if (fruitEaten) {
-        *score += 10;  // ✅ Increase score
-        placeFruit(board); // Generate new fruit
+        *score += 10;
+        placeFruit(board);
     }
 
-    // Add new head
     SnakeNode* newHead = (SnakeNode*)malloc(sizeof(SnakeNode));
     newHead->x = newX;
     newHead->y = newY;
     newHead->next = *head;
     *head = newHead;
 
-    // ✅ FIX: Remove tail only if fruit was NOT eaten
     if (!fruitEaten) {
         SnakeNode* temp = *head;
-        while (temp->next->next != NULL) { // Find second last node
+        while (temp->next->next != NULL) {
             temp = temp->next;
         }
-        board[temp->next->x][temp->next->y] = EMPTY; // Clear old tail position
-        free(temp->next); // Remove tail
+        board[temp->next->x][temp->next->y] = EMPTY;
+        free(temp->next);
         temp->next = NULL;
     }
 
-    // ✅ FIX: Ensure board updates for all snake parts
     SnakeNode* current = *head;
     while (current != NULL) {
         board[current->x][current->y] = SNAKE;
